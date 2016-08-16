@@ -4,8 +4,8 @@ angular.module('gdgXBoomerang')
         // TODO Modify these to configure your app
         'name'          : 'GDG Istanbul',
         'id'            : '100514812580249787371',
-        'googleApi'     : 'AIzaSyDf11szX00rRkcHZDDsz7anqxwaawMnd1E',
-        'pwaId'         : '5915725140705884785', // Picasa Web Album id, must belong to Google+ id above
+        'googleApi'     : 'AIzaSyCtEfZF8O5UUkzVcEutdw-rhD6xFAWkd-s',
+        'pwaId'         : 'cfm0ptim9d2t06h6g3lgho9urqg', // Picasa Web Album id, must belong to Google+ id above
         'domain'        : 'http://gdgistanbul.github.io/website',
         'twitter'       : 'GDGIstanbul',
         'facebook'      : 'GDGIstanbul',
