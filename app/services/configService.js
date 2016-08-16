@@ -4,12 +4,12 @@ angular.module('gdgXBoomerang')
         // TODO Modify these to configure your app
         'name'          : 'GDG Istanbul',
         'id'            : '100514812580249787371',
-        'googleApi'     : 'AIzaSyASVhNWgNFsdHmFeS0VDxX5ExXLYJQ9ho0',
+        'googleApi'     : 'AIzaSyDf11szX00rRkcHZDDsz7anqxwaawMnd1E',
         'pwaId'         : '5915725140705884785', // Picasa Web Album id, must belong to Google+ id above
         'domain'        : 'http://gdgistanbul.github.io/website',
         'twitter'       : 'GDGIstanbul',
         'facebook'      : 'GDGIstanbul',
-        'youtube'       : 'gdgistanbul',
+        'youtube'       : 'GDGIstanbul',
         'meetup'        : 'GDGIstanbul',
         // Change to 'EEEE, MMMM d, y - H:mm' for 24 hour time format.
         'dateFormat'    : 'd MMMM EEEE, y - H:mm',

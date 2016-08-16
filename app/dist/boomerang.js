@@ -6,7 +6,7 @@ angular.module('gdgXBoomerang', ['ngRoute', 'ngSanitize', 'ngAria', 'ngAnimate',
     mc.gdgLink = 'https://developers.google.com/groups/chapter/' + Config.id + '/';
     mc.twitterLink = Config.twitter ? 'https://twitter.com/' + Config.twitter : null;
     mc.facebookLink = Config.facebook ? 'https://www.facebook.com/' + Config.facebook : null;
-    mc.youtubeLink = Config.youtube ? 'https://www.youtube.com/channel/' + Config.youtube : null;
+    mc.youtubeLink = Config.youtube ? 'https://www.youtube.com/user/' + Config.youtube : null;
     mc.meetupLink = Config.meetup ? 'http://www.meetup.com/' + Config.meetup : null;
     $rootScope.$mdMedia = $mdMedia;
     $rootScope.$mdSidenav = $mdSidenav;
@@ -50,12 +50,12 @@ angular.module('gdgXBoomerang')
         // TODO Modify these to configure your app
         'name'          : 'GDG Istanbul',
         'id'            : '100514812580249787371',
-        'googleApi'     : 'AIzaSyASVhNWgNFsdHmFeS0VDxX5ExXLYJQ9ho0',
+        'googleApi'     : 'AIzaSyDf11szX00rRkcHZDDsz7anqxwaawMnd1E',
         'pwaId'         : '5915725140705884785', // Picasa Web Album id, must belong to Google+ id above
         'domain'        : 'http://gdgistanbul.github.io/website',
         'twitter'       : 'GDGIstanbul',
         'facebook'      : 'GDGIstanbul',
-        'youtube'       : 'gdgistanbul',
+        'youtube'       : 'GDGIstanbul',
         'meetup'        : 'GDGIstanbul',
         // Change to 'EEEE, MMMM d, y - H:mm' for 24 hour time format.
         'dateFormat'    : 'd MMMM EEEE, y - H:mm',
@@ -107,6 +107,32 @@ angular.module('gdgXBoomerang')
     function registerNavListener(listenerToRegister) {
         navListener = listenerToRegister;
     }
+});
+
+angular.module('gdgXBoomerang')
+.controller('AboutController', function ($http, $sce, Config, NavService) {
+    var vm = this;
+    vm.loading = true;
+    NavService.setNavTab(0);
+    vm.cover = Config.cover;
+
+    $http.jsonp('https://www.googleapis.com/plus/v1/people/' + Config.id +
+            '?callback=JSON_CALLBACK&fields=aboutMe%2Ccover%2Cimage%2CplusOneCount&key=' + Config.googleApi).
+        success(function (data) {
+            vm.desc = data.aboutMe;
+            $sce.trustAsHtml(vm.desc);
+
+            if (data.cover && data.cover.coverPhoto.url) {
+                vm.cover.url = data.cover.coverPhoto.url;
+            }
+            vm.loading = false;
+            vm.status = 'ready';
+        })
+        .error(function (error) {
+            vm.desc = 'Sorry, we failed to retrieve the About text from the Google+ API.';
+            vm.loading = false;
+            vm.status = 'ready';
+        });
 });
 
 angular.module('gdgXBoomerang')
@@ -203,32 +229,6 @@ angular.module('gdgXBoomerang')
 });
 
 angular.module('gdgXBoomerang')
-.controller('AboutController', function ($http, $sce, Config, NavService) {
-    var vm = this;
-    vm.loading = true;
-    NavService.setNavTab(0);
-    vm.cover = Config.cover;
-
-    $http.jsonp('https://www.googleapis.com/plus/v1/people/' + Config.id +
-            '?callback=JSON_CALLBACK&fields=aboutMe%2Ccover%2Cimage%2CplusOneCount&key=' + Config.googleApi).
-        success(function (data) {
-            vm.desc = data.aboutMe;
-            $sce.trustAsHtml(vm.desc);
-
-            if (data.cover && data.cover.coverPhoto.url) {
-                vm.cover.url = data.cover.coverPhoto.url;
-            }
-            vm.loading = false;
-            vm.status = 'ready';
-        })
-        .error(function (error) {
-            vm.desc = 'Sorry, we failed to retrieve the About text from the Google+ API.';
-            vm.loading = false;
-            vm.status = 'ready';
-        });
-});
-
-angular.module('gdgXBoomerang')
 .controller('ConductController', function ($http, $sce, Config, NavService) {
     var vm = this;
     vm.loading = true;
@@ -301,83 +301,6 @@ angular.module('gdgXBoomerang')
             });
     };
     getPastEventsPage(1);
-});
-
-// Google+ hashtag linky from http://plnkr.co/edit/IEpLfZ8gO2B9mJcTKuWY?p=preview
-angular.module('gdgXBoomerang')
-.filter('hashLinky', function() {
-    var ELEMENT_NODE = 1;
-    var TEXT_NODE = 3;
-    var linkifiedDOM = document.createElement('div');
-    var inputDOM = document.createElement('div');
-
-    return function(input) {
-        inputDOM.innerHTML = input;
-        return hashLinky(inputDOM).innerHTML;
-    };
-
-    function hashLinky(startNode) {
-        var i, currentNode;
-        for (i = 0; i < startNode.childNodes.length; i++) {
-            currentNode = startNode.childNodes[i];
-
-            switch (currentNode.nodeType) {
-                case ELEMENT_NODE:
-                    hashLinky(currentNode);
-                    break;
-                case TEXT_NODE:
-                    var hashtagRegex = /#([A-Za-z0-9-_]+)/g;
-                    currentNode.textContent =  currentNode.textContent.replace(hashtagRegex,
-                        '<a href="https://plus.google.com/s/%23$1" target="_blank">#$1</a>');
-
-                    linkifiedDOM.innerHTML = currentNode.textContent;
-                    i += linkifiedDOM.childNodes.length - 1;
-
-                    while (linkifiedDOM.childNodes.length) {
-                        startNode.insertBefore(linkifiedDOM.childNodes[0], currentNode);
-                    }
-                    startNode.removeChild(currentNode);
-            }
-        }
-        return startNode;
-    }
-});
-
-// HTML-ified linky from http://plnkr.co/edit/IEpLfZ8gO2B9mJcTKuWY?p=preview
-angular.module('gdgXBoomerang')
-.filter('htmlLinky', function($filter) {
-    var ELEMENT_NODE = 1;
-    var TEXT_NODE = 3;
-    var linkifiedDOM = document.createElement('div');
-    var inputDOM = document.createElement('div');
-
-    return function(input) {
-        inputDOM.innerHTML = input;
-        return linkify(inputDOM).innerHTML;
-    };
-
-    function linkify(startNode) {
-        var i, currentNode;
-        for (i = 0; i < startNode.childNodes.length; i++) {
-            currentNode = startNode.childNodes[i];
-
-            switch (currentNode.nodeType) {
-                case ELEMENT_NODE:
-                    linkify(currentNode);
-                    break;
-                case TEXT_NODE:
-                    linkifiedDOM.innerHTML = $filter('linky')(currentNode.textContent, '_blank');
-                    i += linkifiedDOM.childNodes.length - 1;
-
-                    while (linkifiedDOM.childNodes.length) {
-                        startNode.insertBefore(linkifiedDOM.childNodes[0], currentNode);
-                    }
-
-                    startNode.removeChild(currentNode);
-            }
-        }
-        return startNode;
-    }
 });
 
 'use strict';
@@ -455,6 +378,83 @@ angular.module('gdgXBoomerang')
         vm.loading = false;
         vm.status = 'ready';
         $log.debug('Sorry, we failed to retrieve the news from the Google+ API: ' + error);
+    }
+});
+
+// Google+ hashtag linky from http://plnkr.co/edit/IEpLfZ8gO2B9mJcTKuWY?p=preview
+angular.module('gdgXBoomerang')
+.filter('hashLinky', function() {
+    var ELEMENT_NODE = 1;
+    var TEXT_NODE = 3;
+    var linkifiedDOM = document.createElement('div');
+    var inputDOM = document.createElement('div');
+
+    return function(input) {
+        inputDOM.innerHTML = input;
+        return hashLinky(inputDOM).innerHTML;
+    };
+
+    function hashLinky(startNode) {
+        var i, currentNode;
+        for (i = 0; i < startNode.childNodes.length; i++) {
+            currentNode = startNode.childNodes[i];
+
+            switch (currentNode.nodeType) {
+                case ELEMENT_NODE:
+                    hashLinky(currentNode);
+                    break;
+                case TEXT_NODE:
+                    var hashtagRegex = /#([A-Za-z0-9-_]+)/g;
+                    currentNode.textContent =  currentNode.textContent.replace(hashtagRegex,
+                        '<a href="https://plus.google.com/s/%23$1" target="_blank">#$1</a>');
+
+                    linkifiedDOM.innerHTML = currentNode.textContent;
+                    i += linkifiedDOM.childNodes.length - 1;
+
+                    while (linkifiedDOM.childNodes.length) {
+                        startNode.insertBefore(linkifiedDOM.childNodes[0], currentNode);
+                    }
+                    startNode.removeChild(currentNode);
+            }
+        }
+        return startNode;
+    }
+});
+
+// HTML-ified linky from http://plnkr.co/edit/IEpLfZ8gO2B9mJcTKuWY?p=preview
+angular.module('gdgXBoomerang')
+.filter('htmlLinky', function($filter) {
+    var ELEMENT_NODE = 1;
+    var TEXT_NODE = 3;
+    var linkifiedDOM = document.createElement('div');
+    var inputDOM = document.createElement('div');
+
+    return function(input) {
+        inputDOM.innerHTML = input;
+        return linkify(inputDOM).innerHTML;
+    };
+
+    function linkify(startNode) {
+        var i, currentNode;
+        for (i = 0; i < startNode.childNodes.length; i++) {
+            currentNode = startNode.childNodes[i];
+
+            switch (currentNode.nodeType) {
+                case ELEMENT_NODE:
+                    linkify(currentNode);
+                    break;
+                case TEXT_NODE:
+                    linkifiedDOM.innerHTML = $filter('linky')(currentNode.textContent, '_blank');
+                    i += linkifiedDOM.childNodes.length - 1;
+
+                    while (linkifiedDOM.childNodes.length) {
+                        startNode.insertBefore(linkifiedDOM.childNodes[0], currentNode);
+                    }
+
+                    startNode.removeChild(currentNode);
+            }
+        }
+        return startNode;
     }
 });
 
